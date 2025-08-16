@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>🎉 A Birthday Wish For You</title>
+  <meta name="description" content="Open your surprise birthday wish!">
+  <meta property="og:title" content="🎉 A Birthday Wish For You">
+  <meta property="og:description" content="Open your surprise birthday wish!">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#ff4d6d">
+  <style>
+    :root{
+      --bg:#0f0f14;
+      --card:#15151f;
+      --accent:#ff4d6d;
+      --soft:#ffd6e0;
+      --text:#f6f7fb;
+      --muted:#a7a8b3;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial;
+      background: radial-gradient(1200px 800px at 70% -10%, #1c1c28 0%, transparent 60%) , var(--bg);
+      color:var(--text);
+      overflow-x:hidden;
+    }
+    .wrap{ min-height:100dvh; display:flex; align-items:center; justify-content:center; padding:24px; }
+    .card{
+      width:min(720px, 92vw); background:linear-gradient(180deg, rgba(255,77,109,0.08), transparent 35%), var(--card);
+      border:1px solid rgba(255,255,255,0.08);
+      border-radius:24px; padding:28px; box-shadow: 0 10px 40px rgba(0,0,0,0.35);
+      position:relative; overflow:hidden;
+    }
+    .pill{
+      display:inline-flex; gap:8px; align-items:center; padding:8px 12px; border-radius:999px;
+      background:rgba(255,77,109,0.15); color:#ffd6e0; font-weight:600; letter-spacing:.2px; font-size:14px;
+      border:1px solid rgba(255,77,109,0.35);
+    }
+    h1{font-size:clamp(28px, 4.5vw, 42px); margin:16px 0 6px; line-height:1.1}
+    .subtitle{color:var(--muted); margin:0 0 20px; font-size:clamp(14px, 2.2vw, 16px)}
+    .envelope{ --w: 220px; width:var(--w); height:160px; margin: 18px auto 10px; position:relative; cursor:pointer; transform: translateZ(0); }
+    .env-body{position:absolute; inset:0; border-radius:12px; background: linear-gradient(180deg, #ff8fab, #ff4d6d);}
+    .env-flap{position:absolute; left:0; right:0; top:0; height:0; padding-top:56%; background:linear-gradient(180deg,#ffb3c1,#ff6b85); clip-path: polygon(0 0, 100% 0, 50% 100%); transform-origin: top; transition: transform .8s cubic-bezier(.2,.8,.2,1); border-top-left-radius:12px; border-top-right-radius:12px;}
+    .env-letter{
+      position:absolute; left:8%; right:8%; top:18%; height:64%; background:white; border-radius:12px; color:#222; padding:14px; overflow:hidden;
+      box-shadow:0 6px 20px rgba(0,0,0,.18);
+      transform: translateY(22%); transition: transform .8s cubic-bezier(.2,.8,.2,1);
+    }
+    .envelope.open .env-flap{ transform: rotateX(180deg); }
+    .envelope.open .env-letter{ transform: translateY(-16%); }
+    .letter-title{font-weight:700; font-size:16px; margin:0 0 8px; color:#ff4d6d}
+    .letter-text{font-size:14px; line-height:1.4; margin:0}
+    .actions{display:flex; gap:12px; flex-wrap:wrap; margin-top:20px}
+    .btn{
+      appearance:none; border:none; padding:12px 16px; border-radius:12px; font-weight:700; cursor:pointer;
+      background: linear-gradient(180deg, #ff4d6d, #ff2d55); color:white; box-shadow:0 8px 26px rgba(255,45,85,.35);
+    }
+    .btn.secondary{ background:transparent; color:var(--text); border:1px solid rgba(255,255,255,.14); box-shadow: none; }
+    .footer{margin-top:22px; color:var(--muted); font-size:13px}
+    .hearts{position:absolute; inset:0; pointer-events:none; overflow:hidden}
+    .hearts span{
+      position:absolute; width:16px; height:16px; background: var(--accent); transform: rotate(45deg); opacity:.8;
+      left: var(--x); top: var(--y); animation: floatUp var(--d) linear infinite;
+      box-shadow: 0 0 18px rgba(255,77,109,.4);
+    }
+    .hearts span::before, .hearts span::after{content:""; position:absolute; width:100%; height:100%; background:var(--accent); border-radius:50%}
+    .hearts span::before{ top:-50% }
+    .hearts span::after{ left:-50% }
+    @keyframes floatUp{
+      0%{ transform: translate(-50%, 0) rotate(45deg); opacity:.9}
+      90%{opacity:.05}
+      100%{ transform: translate(-50%, -120vh) rotate(45deg); opacity:0}
+    }
+    .confetti-canvas{position:fixed; inset:0; pointer-events:none}
+    .hidden{display:none}
+    .msg{
+      background: rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.12); border-radius:16px; padding:16px; line-height:1.6;
+      font-size:clamp(15px, 2.4vw, 18px);
+    }
+    .name{color:#ffd6e0}
+    .from{color:#ffd6e0; font-weight:600}
+    .copy-info{font-size:12px; color:var(--muted)}
+    .center{text-align:center}
+    .subtitle a{ color:#ffd6e0; }
+  </style>
+</head>
+<body>
+  <canvas class="confetti-canvas hidden"></canvas>
+  <div class="wrap">
+    <div class="card" id="card">
+      <div class="pill">💌 Open your birthday surprise</div>
+      <h1 id="title">Happy Birthday, <span class="name" id="name">you</span>! 🎂</h1>
+      <p class="subtitle" id="subtitle">Tap the envelope to reveal your message. Tip: use <code>?name=...&from=...&msg=...</code> in the URL to personalize.</p>
+
+      <div class="envelope" id="envelope" aria-label="Open birthday message" role="button" tabindex="0">
+        <div class="env-body"></div>
+        <div class="env-flap"></div>
+        <div class="env-letter">
+          <p class="letter-title">A little note 💖</p>
+          <p class="letter-text" id="letterText">I hope today is full of smiles, sweet surprises, and all your favorite things.</p>
+        </div>
+        <div class="hearts" aria-hidden="true"></div>
+      </div>
+
+      <div class="msg" id="mainMsg">
+        Wishing you the happiest birthday, <span class="name" id="nameInline">you</span>! <span id="msgText">You light up every room you walk into, and I feel really lucky to know you. May this year bring you joy, adventures, and everything you’ve been wishing for.</span>
+        <br><br> — From <span class="from" id="fromName">someone who admires you</span> 🫶
+      </div>
+
+      <div class="actions">
+        <button class="btn" id="replayBtn">🎉 Replay Confetti</button>
+        <button class="btn secondary" id="copyLinkBtn">🔗 Copy Shareable Link</button>
+      </div>
+      <p class="copy-info" id="copyInfo"></p>
+
+      <div class="footer center">Made with a tiny bit of code & a lot of ❤️</div>
+    </div>
+  </div>
+
+  <script>
+    // --- Helpers to read query params ---
+    function getParams(){
+      const p = new URLSearchParams(window.location.search);
+      return {
+        name: p.get("name") || "",
+        from: p.get("from") || "",
+        msg:  p.get("msg")  || ""
+      };
+    }
+    function setText(id, value, fallback){
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.textContent = value?.trim() ? value : fallback;
+    }
+
+    // Hearts background
+    (function makeHearts(){
+      const hearts = document.querySelector(".hearts");
+      const count = 30;
+      for(let i=0;i<count;i++){
+        const s = document.createElement("span");
+        s.style.setProperty("--x", Math.random()*100 + "%");
+        s.style.setProperty("--y", (80+Math.random()*20) + "vh");
+        s.style.setProperty("--d", (6+Math.random()*6) + "s");
+        s.style.opacity = (0.5 + Math.random()*0.5).toFixed(2);
+        hearts.appendChild(s);
+      }
+    })();
+
+    // Confetti
+    const canvas = document.querySelector(".confetti-canvas");
+    const ctx = canvas.getContext("2d");
+    let confetti = [];
+    function resize(){ canvas.width = innerWidth; canvas.height = innerHeight; }
+    addEventListener("resize", resize); resize();
+    function shootConfetti(){
+      canvas.classList.remove("hidden");
+      confetti = [];
+      const colors = ["#ff4d6d","#ffd166","#06d6a0","#118ab2","#ef476f","#8338ec"];
+      for(let i=0;i<240;i++){
+        confetti.push({ x: Math.random()*canvas.width, y: -10 - Math.random()*canvas.height*0.3, r: 4+Math.random()*6, c: colors[(Math.random()*colors.length)|0], vx: -2+Math.random()*4, vy: 2+Math.random()*3, a: Math.random()*Math.PI*2, va: -0.2 + Math.random()*0.4 });
+      }
+      let t = 0; const maxT = 420;
+      (function frame(){
+        ctx.clearRect(0,0,canvas.width, canvas.height);
+        confetti.forEach(p=>{
+          p.x += p.vx; p.y += p.vy; p.a += p.va; p.vy += 0.02;
+          ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.a); ctx.fillStyle = p.c; ctx.fillRect(-p.r/2,-p.r/2,p.r,p.r); ctx.restore();
+        });
+        t++; if(t < maxT) requestAnimationFrame(frame); else canvas.classList.add("hidden");
+      })();
+    }
+
+    // Envelope interactions
+    const envelope = document.getElementById("envelope");
+    let opened = false;
+    function openEnvelope(){
+      if(opened) return;
+      opened = true;
+      envelope.classList.add("open");
+      setTimeout(shootConfetti, 450);
+      document.getElementById("subtitle").textContent = "Here’s your message ✨";
+    }
+    envelope.addEventListener("click", openEnvelope);
+    envelope.addEventListener("keypress", (e)=>{ if(e.key==="Enter"||e.key===" "){ openEnvelope(); }});
+
+    // Replay button
+    document.getElementById("replayBtn").addEventListener("click", shootConfetti);
+
+    // Copy link button
+    document.getElementById("copyLinkBtn").addEventListener("click", async ()=>{
+      const url = new URL(window.location.href);
+      const p = getParams();
+      const name = p.name || document.getElementById("name").textContent;
+      const from = p.from || document.getElementById("fromName").textContent;
+      const msg = p.msg || document.getElementById("msgText").textContent;
+      url.search = new URLSearchParams({name, from, msg}).toString();
+      try{
+        await navigator.clipboard.writeText(url.toString());
+        document.getElementById("copyInfo").textContent = "Link copied! You can paste it in chat or WhatsApp.";
+      }catch(_){
+        document.getElementById("copyInfo").textContent = "Couldn't access clipboard. Long-press the address bar to copy the link.";
+      }
+    });
+
+    // Apply params on load
+    (function applyParams(){
+      const {name, from, msg} = getParams();
+      const nameSafe = (name || "").trim();
+      const fromSafe = (from || "").trim();
+      const msgSafe = (msg || "").trim();
+      setText("name", nameSafe, "you");
+      setText("nameInline", nameSafe, "you");
+      setText("fromName", fromSafe, "someone who admires you");
+      setText("letterText", msgSafe, "I hope today is full of smiles, sweet surprises, and all your favorite things.");
+      setText("msgText", msgSafe, "You light up every room you walk into, and I feel really lucky to know you. May this year bring you joy, adventures, and everything you’ve been wishing for.");
+      if(nameSafe){ document.title = `🎉 Happy Birthday, ${nameSafe}!`; }
+    })();
+  </script>
+</body>
+</html>
